@@ -5,6 +5,9 @@ const path = require('path');
 const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 
+const handler = require('./graphql/schema');
+const root = require('./graphql/root');
+
 const URI = 'mongodb+srv://sa:123@mongodbpractice123.zxtp6fe.mongodb.net/shopDatabase987?w=majority&appName=mongoDBPractice123'
 
 const app = express();
@@ -40,6 +43,8 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     next();
 });
+
+app.use('/graphql', handler(root));
 
 app.use((error, req, res, next) => {
     console.log(error);
