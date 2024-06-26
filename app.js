@@ -5,9 +5,6 @@ const path = require('path');
 const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 
-const feedRoutes = require('./routes/feed');
-const userRoutes = require('./routes/user');
-
 const URI = 'mongodb+srv://sa:123@mongodbpractice123.zxtp6fe.mongodb.net/shopDatabase987?w=majority&appName=mongoDBPractice123'
 
 const app = express();
@@ -44,9 +41,6 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use('/feed', feedRoutes);
-app.use('/user', userRoutes);
-
 app.use((error, req, res, next) => {
     console.log(error);
     const status = error.statusCode || 500;
@@ -59,13 +53,7 @@ app.use((error, req, res, next) => {
 });
 
 async function main() {
-    const server = app.listen(8080);
-    const io = require('./socket').init(server);
-
-    io.on('connection', socket => {
-        console.log('client connected');
-    });
-
+    app.listen(8080);
     await mongoose.connect(URI);
 }
 
