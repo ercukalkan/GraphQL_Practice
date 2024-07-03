@@ -27,11 +27,16 @@ const schema = buildSchema(`
         password: String!
     }
 
+    type RootQuery {
+        hello123: String
+    }
+
     type RootMutation {
         createUser(userInput: UserInputData): User!
     }
 
     schema {
+        query: RootQuery
         mutation: RootMutation
     }
 `)

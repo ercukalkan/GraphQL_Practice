@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const path = require('path');
 const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
+const expressPlayground = require('graphql-playground-middleware-express').default;
 
 const handler = require('./graphql/schema');
 const root = require('./graphql/root');
@@ -45,6 +46,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/graphql', handler(root));
+app.use('/playground', expressPlayground({ endpoint: '/graphql' }));
 
 app.use((error, req, res, next) => {
     console.log(error);
