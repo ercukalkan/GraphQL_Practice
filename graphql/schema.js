@@ -44,6 +44,19 @@ const schema = buildSchema(`
 module.exports = rootValue => {
     return createHandler({
         schema: schema,
-        rootValue: rootValue
+        rootValue: rootValue,
+        formatError(err) {
+            if (!err.originalError) {
+                return err;
+            }
+            const data = err.originalError.data;
+            const message = err.message || 'an error occured';
+            const code = err.originalError.code || 500;
+            return {
+                message: message,
+                status: code,
+                data: data
+            };
+        }
     });
 }
