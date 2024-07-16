@@ -9,6 +9,8 @@ const expressPlayground = require('graphql-playground-middleware-express').defau
 const handler = require('./graphql/schema');
 const root = require('./graphql/root');
 
+const auth = require('./middleware/auth');
+
 const URI = 'mongodb+srv://sa:123@mongodbpractice123.zxtp6fe.mongodb.net/shopDatabase987?w=majority&appName=mongoDBPractice123'
 
 const app = express();
@@ -47,6 +49,8 @@ app.use((req, res, next) => {
     }
     next();
 });
+
+app.use(auth);
 
 app.use('/graphql', handler(root));
 app.use('/playground', expressPlayground({ endpoint: '/graphql' }));

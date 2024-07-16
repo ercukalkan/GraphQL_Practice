@@ -53,10 +53,14 @@ const schema = buildSchema(`
     }
 `)
 
-module.exports = rootValue => {
+module.exports = (rootValue) => {
     return createHandler({
         schema: schema,
         rootValue: rootValue,
+        context: {
+            abc: 123,
+            def: 321
+        },
         formatError(err) {
             if (!err.originalError) {
                 return err;
