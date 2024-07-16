@@ -32,12 +32,19 @@ const schema = buildSchema(`
         password: String!
     }
 
+    input PostInputData {
+        title: String!
+        content: String!
+        imageUrl: String!
+    }
+
     type RootQuery {
         login(email: String!, password: String!): AuthData!
     }
 
     type RootMutation {
         createUser(userInput: UserInputData): User!
+        createPost(postInput: PostInputData): Post!
     }
 
     schema {
@@ -46,10 +53,14 @@ const schema = buildSchema(`
     }
 `)
 
-module.exports = rootValue => {
+module.exports = (rootValue) => {
     return createHandler({
         schema: schema,
         rootValue: rootValue,
+        context: {
+            abc: 123,
+            def: 321
+        },
         formatError(err) {
             if (!err.originalError) {
                 return err;
