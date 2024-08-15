@@ -6,10 +6,9 @@ const multer = require('multer');
 const { v4: uuidv4 } = require('uuid');
 const expressPlayground = require('graphql-playground-middleware-express').default;
 
-const handler = require('./graphql/schema');
-const root = require('./graphql/root');
-
+const schema = require('./graphql/schema');
 const auth = require('./middleware/auth');
+const { createHandler } = require('graphql-http/lib/use/express');
 
 const URI = 'mongodb+srv://sa:123@mongodbpractice123.zxtp6fe.mongodb.net/shopDatabase987?w=majority&appName=mongoDBPractice123'
 
@@ -52,7 +51,17 @@ app.use((req, res, next) => {
 
 app.use(auth);
 
-app.use('/graphql', handler(root));
+app.use('/graphql', createHandler({
+    schema: schema,
+    context: (req, params) => {
+        if (params.operationName === 'CreatePost') {
+            if (!req.raw.isAuth) {
+                throw new Error('user is not authenticated.')
+            }
+        }
+    }
+}));
+
 app.use('/playground', expressPlayground({ endpoint: '/graphql' }));
 
 app.use((error, req, res, next) => {

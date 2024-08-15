@@ -1,78 +1,75 @@
-const { buildSchema } = require("graphql");
-const { createHandler } = require("graphql-http/lib/use/express");
+const { GraphQLSchema, GraphQLObjectType, GraphQLList, GraphQLString } = require("graphql");
 
-const schema = buildSchema(`
-    type Post {
-        _id: ID!
-        title: String!
-        content: String!
-        imageUrl: String!
-        creator: User!
-        createdAt: String!
-        updatedAt: String!
-    }
+const UserType = require("./TypeDefinitions/UserType");
+const PostType = require("./TypeDefinitions/PostType");
+const AuthType = require("./TypeDefinitions/AuthType");
 
-    type User {
-        _id: ID!
-        name: String!
-        email: String!
-        password: String
-        status: String!
-        posts: [Post!]!
-    }
+const User = require("../models/user");
+const Post = require("../models/post");
 
-    type AuthData {
-        token: String!
-        userId: String!
-    }
+const { resolverCreateUser, resolverLogin, resolverCreatePost } = require('./resolver');
 
-    input UserInputData {
-        email: String!
-        name: String!
-        password: String!
-    }
-
-    input PostInputData {
-        title: String!
-        content: String!
-        imageUrl: String!
-    }
-
-    type RootQuery {
-        login(email: String!, password: String!): AuthData!
-    }
-
-    type RootMutation {
-        createUser(userInput: UserInputData): User!
-        createPost(postInput: PostInputData): Post!
-    }
-
-    schema {
-        query: RootQuery
-        mutation: RootMutation
-    }
-`)
-
-module.exports = (rootValue) => {
-    return createHandler({
-        schema: schema,
-        rootValue: rootValue,
-        context: {
-            abc: 123,
-            def: 321
-        },
-        formatError(err) {
-            if (!err.originalError) {
-                return err;
+const RootQuery = new GraphQLObjectType({
+    name: 'RootQueryType',
+    fields: {
+        hello: {
+            type: GraphQLString,
+            resolve(obj, args, context, info) {
+                return 'hello world';
             }
-            const data = err.originalError.data;
-            const message = err.message || 'an error occured';
-            const code = err.originalError.code || 500;
-            return {
-                message: message,
-                status: code,
-                data: data
-            };
+        },
+
+        getUsers: {
+            type: new GraphQLList(UserType),
+            async resolve() {
+                const users = await User.find();
+                return users;
+            }
+        },
+
+        login: {
+            type: AuthType,
+            args: {
+                email: {
+                    type: GraphQLString
+                },
+                password: {
+                    type: GraphQLString
+                }
+            },
+            async resolve(req, args) {
+                return resolverLogin(args);
+            }
         }
-    });
-}
+    }
+});
+
+const RootMutation = new GraphQLObjectType({
+    name: 'RootMutationType',
+    fields: {
+        createUser: {
+            type: UserType,
+            args: {
+                email: {
+                    type: GraphQLString
+                },
+                name: {
+                    type: GraphQLString
+                },
+                password: {
+                    type: GraphQLString
+                }
+            },
+            async resolve(source, args, context, info) {
+                return await resolverCreateUser(args);
+            }
+        }
+    }
+});
+
+const schema = new GraphQLSchema({
+    query: RootQuery,
+    mutation: RootMutation
+});
+
+module.exports = schema;
