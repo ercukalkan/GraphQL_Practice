@@ -77,5 +77,49 @@ module.exports = {
             token: token,
             userId: user._id.toString()
         };
+    },
+
+    resolverCreatePost: async function (args) {
+        const errors = [];
+
+        if (validator.isEmpty(args.title) ||
+            !validator.isLength(args.title, { min: 5 })) {
+            errors.push({ message: 'title is invalid' });
+        }
+
+        if (validator.isEmpty(args.content) ||
+            !validator.isLength(args.content, { min: 5 })) {
+            errors.push({ message: 'content is invalid' });
+        }
+
+        if (errors.length > 0) {
+            const error = new Error('invalid input');
+            error.data = errors;
+            error.code = 422;
+            throw error;
+        }
+
+        const user = await User.findById(args.userId);
+
+        if (!user) {
+            const error = new Error('invalid user');
+            error.code = 401;
+            throw error;
+        }
+
+        const newPost = new Post({
+            title: args.title,
+            content: args.content,
+            imageUrl: args.imageUrl,
+            creator: user
+        });
+
+        const createdPost = await newPost.save();
+
+        user.posts.push(createdPost);
+
+        await user.save();
+
+        return createdPost;
     }
 }

@@ -38,7 +38,7 @@ const RootQuery = new GraphQLObjectType({
                 }
             },
             async resolve(req, args) {
-                return resolverLogin(args);
+                return await resolverLogin(args);
             }
         }
     }
@@ -62,6 +62,27 @@ const RootMutation = new GraphQLObjectType({
             },
             async resolve(source, args, context, info) {
                 return await resolverCreateUser(args);
+            }
+        },
+
+        createPost: {
+            type: PostType,
+            args: {
+                userId: {
+                    type: GraphQLString
+                },
+                title: {
+                    type: GraphQLString
+                },
+                content: {
+                    type: GraphQLString
+                },
+                imageUrl: {
+                    type: GraphQLString
+                }
+            },
+            async resolve(source, args, context, info) {
+                return await resolverCreatePost(args);
             }
         }
     }
