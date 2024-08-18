@@ -40,6 +40,19 @@ const RootQuery = new GraphQLObjectType({
             async resolve(req, args) {
                 return await resolverLogin(args);
             }
+        },
+
+        getPosts: {
+            type: new GraphQLList(PostType),
+            args: {
+                id: {
+                    type: GraphQLString
+                }
+            },
+            async resolve(req, args) {
+                const posts = await Post.find({ creator: args.id }).populate('creator');
+                return posts;
+            }
         }
     }
 });

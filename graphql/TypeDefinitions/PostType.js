@@ -1,4 +1,4 @@
-const { GraphQLObjectType, GraphQLString, GraphQLList } = require('graphql');
+const { GraphQLObjectType, GraphQLString, GraphQLInt, GraphQLFloat } = require('graphql');
 
 const PostType = new GraphQLObjectType({
     name: 'PostType',
@@ -7,7 +7,9 @@ const PostType = new GraphQLObjectType({
         title: { type: GraphQLString },
         content: { type: GraphQLString },
         imageUrl: { type: GraphQLString },
-        creator: { type: require('./UserType') }
+        creator: { type: require('./UserType') },
+        createdAt: { type: GraphQLFloat },
+        updatedAt: { type: GraphQLFloat }
     })
 });
 
