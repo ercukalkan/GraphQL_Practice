@@ -97,6 +97,43 @@ const RootMutation = new GraphQLObjectType({
             async resolve(source, args, context, info) {
                 return await resolverCreatePost(args);
             }
+        },
+
+        deletePost: {
+            type: PostType,
+            args: {
+                id: {
+                    type: GraphQLString
+                },
+                userId: {
+                    type: GraphQLString
+                }
+            },
+            async resolve(source, args, context, info) {
+                const post = await Post.findById(args.id);
+
+                if (!post) {
+                    const error = new Error('post not found');
+                    error.code = 401;
+                    throw error;
+                }
+
+                if (post.creator.toString() !== args.userId.toString()) {
+                    const error = new Error('invalid user for this post');
+                    error.code = 401;
+                    throw error;
+                }
+
+                const deletedPost = await Post.findByIdAndDelete(args.id);
+
+                const user = await User.findById(args.userId);
+
+                user.posts = user.posts.filter(i => i.toString() !== args.id.toString());
+
+                await user.save();
+
+                return deletedPost;
+            }
         }
     }
 });
