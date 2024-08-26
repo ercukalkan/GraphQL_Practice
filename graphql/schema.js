@@ -53,6 +53,26 @@ const RootQuery = new GraphQLObjectType({
                 const posts = await Post.find({ creator: args.id }).populate('creator');
                 return posts;
             }
+        },
+
+        getPostById: {
+            type: PostType,
+            args: {
+                id: {
+                    type: GraphQLString
+                }
+            },
+            async resolve(req, args) {
+                const post = await Post.findById(args.id).populate('creator');
+
+                if (!post) {
+                    const error = new Error('post not found');
+                    error.code = 401;
+                    throw error;
+                }
+
+                return post;
+            }
         }
     }
 });
